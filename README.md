@@ -26,6 +26,7 @@ This repository contains **Dockerfile** for running **Apache Airflow** with **My
  
 We will use **docker-compose.yml** to run multiple services with a 
 single command.
+
     docker-compose -f docker-compose.yml up
 If needed to run multiple instance of workers in daemon mode, then run
     
