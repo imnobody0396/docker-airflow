@@ -1,0 +1,77 @@
+version: '3.7'
+services:
+    rabbitmq:
+        image: rabbitmq:3.7.17-management-alpine
+        restart: always
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            - RABBITMQ_DEFAULT_USER=airflow
+            - RABBITMQ_DEFAULT_PASS=airflow
+            - RABBITMQ_DEFAULT_VHOST=airflow_vhost
+
+    mysql:
+        image: mysql:5
+        restart: always
+        ports:
+            - "3306:3306"
+        environment:
+            - MYSQL_DATABASE=airflow
+            - MYSQL_ROOT_PASSWORD=root
+        volumes:
+            - "/Users/b0207068/docker/volumes/mysql:/var/lib/mysql"
+        command: --explicit_defaults_for_timestamp=1
+
+    webserver:
+        image: raghav0396/scavenger-airflow:dev
+        restart: always
+        depends_on:
+            - rabbitmq
+            - mysql
+        volumes:
+            - "/Users/b0207068/airflow/dags:/data/airflow/dags"
+            - "/Users/b0207068/Documents/venv/Scavenger:/data/airflow/scavenger"
+        ports:
+            - "9000:8080"
+        command: webserver
+        healthcheck:
+            test: ["CMD-SHELL", "[ -f /data/airflow/airflow-webserver.pid ]"]
+            interval: 30s
+            timeout: 30s
+            retries: 3
+
+    scheduler:
+        image: raghav0396/scavenger-airflow:dev
+        restart: always
+        depends_on:
+            - webserver
+        volumes:
+            - "/Users/b0207068/airflow/dags:/data/airflow/dags"
+            - "/Users/b0207068/Documents/venv/Scavenger:/data/airflow/scavenger"
+        command: scheduler
+
+    worker:
+        image: raghav0396/scavenger-airflow:dev
+        restart: always
+        depends_on:
+            - scheduler
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+        environment:
+            - C_FORCE_ROOT=true
+        volumes:
+            - "/Users/b0207068/airflow/dags:/data/airflow/dags"
+            - "/Users/b0207068/Documents/venv/Scavenger:/data/airflow/scavenger"
+        command: worker
+
+    flower:
+        image: raghav0396/scavenger-airflow:dev
+        restart: always
+        depends_on:
+            - webserver
+        ports:
+            - "5555:5555"
+        command: flower
