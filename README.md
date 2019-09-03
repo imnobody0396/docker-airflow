@@ -20,13 +20,12 @@ This repository contains **Dockerfile** for running **Apache Airflow** with **My
     docker pull raghav0396/scavenger-airflow:dev
 
 ## Running Docker Image
-##### Using, docker-compose
-We will use **docker-compose.yml** to run multiple services with a 
-single command.
-
+### Using, docker-compose
 **NOTE:-** Make below listed docker-compose changes before running
  these commands.
-
+ 
+We will use **docker-compose.yml** to run multiple services with a 
+single command.
     docker-compose -f docker-compose.yml up
 If needed to run multiple instance of workers in daemon mode, then run
     
